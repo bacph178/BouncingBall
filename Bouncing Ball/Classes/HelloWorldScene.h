@@ -32,16 +32,23 @@ public:
     static cocos2d::CCScene* scene();
     
     void initPhysics();
-    // adds a new sprite at a given coordinate
-    void addNewSpriteAtPosition(cocos2d::CCPoint p);
-
     virtual void draw();
     virtual void ccTouchesEnded(cocos2d::CCSet* touches, cocos2d::CCEvent* event);
+    virtual void ccTouchesBegan(cocos2d::CCSet* touches, cocos2d::CCEvent *event);
+    virtual void ccTouchesMoved(cocos2d::CCSet *touches, cocos2d::CCEvent *event);
+    virtual void ccTouchesCancelled(cocos2d::CCSet *touches, cocos2d::CCEvent *event);
+    virtual void accelerometer(cocos2d::CCAcceleration *accelerometer,  cocos2d::CCAcceleration *acceleration);
     void update(float dt);
     
 private:
-    b2World* world;
     cocos2d::CCTexture2D* m_pSpriteTexture; // weak ref
+    b2World *_world;
+    b2Body *_groundBody;
+    b2Fixture *_bottomFixture;
+    b2Fixture *_ballFixture;
+    b2Body *_paddleBody;
+    b2Fixture *_paddleFixture;
+    b2MouseJoint *_mouseJoint;
 };
 
 #endif // __HELLO_WORLD_H__

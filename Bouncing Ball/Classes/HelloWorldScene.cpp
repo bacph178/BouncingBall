@@ -82,9 +82,9 @@ HelloWorld::HelloWorld()
     addChild(parent, 0, kTagParentNode);
 
 
-    addNewSpriteAtPosition(ccp(s.width/2, s.height/2));
+  //  addNewSpriteAtPosition(ccp(s.width/2, s.height/2));
 
-    CCLabelTTF *label = CCLabelTTF::create("Tap screen", "Marker Felt", 32);
+    CCLabelTTF *label = CCLabelTTF::create("DEMO BOX2D", "Marker Felt", 32);
     addChild(label, 0);
     label->setColor(ccc3(0,0,255));
     label->setPosition(ccp( s.width/2, s.height-50));
@@ -94,8 +94,8 @@ HelloWorld::HelloWorld()
 
 HelloWorld::~HelloWorld()
 {
-    delete world;
-    world = NULL;
+    delete _world;
+    _world = NULL;
     
     //delete m_debugDraw;
 }
@@ -105,55 +105,139 @@ void HelloWorld::initPhysics()
 
     CCSize s = CCDirector::sharedDirector()->getWinSize();
 
-    b2Vec2 gravity;
-    gravity.Set(0.0f, -10.0f);
-    world = new b2World(gravity);
-
-    // Do we want to let bodies sleep?
-    world->SetAllowSleeping(true);
-
-    world->SetContinuousPhysics(true);
-
-//     m_debugDraw = new GLESDebugDraw( PTM_RATIO );
-//     world->SetDebugDraw(m_debugDraw);
-
-    uint32 flags = 0;
-    flags += b2Draw::e_shapeBit;
-    //        flags += b2Draw::e_jointBit;
-    //        flags += b2Draw::e_aabbBit;
-    //        flags += b2Draw::e_pairBit;
-    //        flags += b2Draw::e_centerOfMassBit;
-    //m_debugDraw->SetFlags(flags);
-
-
-    // Define the ground body.
+    // Create a world
+    b2Vec2 gravity = b2Vec2(0.0f, 0.0f);
+    _world = new b2World(gravity);
+    
+    // Create edges around the entire screen
     b2BodyDef groundBodyDef;
-    groundBodyDef.position.Set(0, 0); // bottom-left corner
-
-    // Call the body factory which allocates memory for the ground body
-    // from a pool and creates the ground box shape (also from a pool).
-    // The body is also added to the world.
-    b2Body* groundBody = world->CreateBody(&groundBodyDef);
-
-    // Define the ground box shape.
+    groundBodyDef.position.Set(0,0);
+    _groundBody = _world->CreateBody(&groundBodyDef);
+    
     b2EdgeShape groundBox;
+    b2FixtureDef groundBoxDef;
+    groundBoxDef.shape = &groundBox;
+    
+    groundBox.Set(b2Vec2(0,0), b2Vec2(s.width/PTM_RATIO, 0));
+    _bottomFixture = _groundBody->CreateFixture(&groundBoxDef);
+    
+    groundBox.Set(b2Vec2(0,0), b2Vec2(0, s.height/PTM_RATIO));
+    _groundBody->CreateFixture(&groundBoxDef);
+    
+    groundBox.Set(b2Vec2(0, s.height/PTM_RATIO), b2Vec2(s.width/PTM_RATIO,
+                                                              s.height/PTM_RATIO));
+    _groundBody->CreateFixture(&groundBoxDef);
+    
+    groundBox.Set(b2Vec2(s.width/PTM_RATIO, s.height/PTM_RATIO),
+                  b2Vec2(s.width/PTM_RATIO, 0));
+    _groundBody->CreateFixture(&groundBoxDef);
+    
+    // Create sprite and add it to the layer
+    CCSprite *ball = CCSprite::create("ball.png");
+    ball->setPosition(ccp(100, 100));
+    ball->setTag(1);
+    this->addChild(ball);
+    
+    // Create ball body
+    b2BodyDef ballBodyDef;
+    ballBodyDef.type = b2_dynamicBody;
+    ballBodyDef.position.Set(100/PTM_RATIO, 100/PTM_RATIO);
+    ballBodyDef.userData = ball;
+    b2Body * ballBody = _world->CreateBody(&ballBodyDef);
+    
+    // Create circle shape
+    b2CircleShape circle;
+    circle.m_radius = 26.0/PTM_RATIO;
+    
+    // Create shape definition and add to body
+    b2FixtureDef ballShapeDef;
+    ballShapeDef.shape = &circle;
+    ballShapeDef.density = 1.0f;
+    ballShapeDef.friction = 0.f;
+    ballShapeDef.restitution = 1.0f;
+    _ballFixture = ballBody->CreateFixture(&ballShapeDef);
+    
+    b2Vec2 force = b2Vec2(10, 10);
+    ballBody->ApplyLinearImpulse(force, ballBodyDef.position);
+    
+    // Create paddle and add it to the layer
+    CCSprite *paddle = CCSprite::create("paddle.png");
+    paddle->setPosition(ccp(s.width/2, 50));
+    this->addChild(paddle);
+    
+    // Create paddle body
+    b2BodyDef paddleBodyDef;
+    paddleBodyDef.type = b2_dynamicBody;
+    paddleBodyDef.position.Set(s.width/2/PTM_RATIO, 50/PTM_RATIO);
+    paddleBodyDef.userData = paddle;
+    _paddleBody = _world->CreateBody(&paddleBodyDef);
+    
+    // Create paddle shape
+    b2PolygonShape paddleShape;
+    paddleShape.SetAsBox(paddle->getContentSize().width/PTM_RATIO/2,
+                         paddle->getContentSize().height/PTM_RATIO/2);
+    
+    // Create shape definition and add to body
+    b2FixtureDef paddleShapeDef;
+    paddleShapeDef.shape = &paddleShape;
+    paddleShapeDef.density = 10.0f;
+    paddleShapeDef.friction = 0.4f;
+    paddleShapeDef.restitution = 0.1f;
+    _paddleFixture = _paddleBody->CreateFixture(&paddleShapeDef);
+    
+    this->setTouchEnabled(true);
+    
+    this->schedule(schedule_selector(HelloWorld::update),1/60);
+}
 
-    // bottom
+void HelloWorld::ccTouchesBegan(cocos2d::CCSet* touches, cocos2d::CCEvent *event)
+{
+    if (_mouseJoint != NULL) return;
+    
+    CCTouch *myTouch = (CCTouch*)touches->anyObject();
+    CCPoint location = myTouch->getLocationInView();
+    location = CCDirector::sharedDirector()->convertToGL(location);
+    b2Vec2 locationWorld = b2Vec2(location.x/PTM_RATIO, location.y/PTM_RATIO);
+    
+    if (_paddleFixture->TestPoint(locationWorld)) {
+        b2MouseJointDef md;
+        md.bodyA = _groundBody;
+        md.bodyB = _paddleBody;
+        md.target = locationWorld;
+        md.collideConnected = true;
+        md.maxForce = 1000.0f * _paddleBody->GetMass();
+        
+        _mouseJoint = (b2MouseJoint *)_world->CreateJoint(&md);
+        _paddleBody->SetAwake(true);
+    }
+}
 
-    groundBox.Set(b2Vec2(0,0), b2Vec2(s.width/PTM_RATIO,0));
-    groundBody->CreateFixture(&groundBox,0);
+void HelloWorld::ccTouchesMoved(cocos2d::CCSet *touches, cocos2d::CCEvent *event)
+{
+    if (_mouseJoint == NULL) return;
+    
+    CCTouch *myTouch = (CCTouch *)touches->anyObject();
+    CCPoint location = myTouch->getLocationInView();
+    location = CCDirector::sharedDirector()->convertToGL(location);
+    b2Vec2 locationWorld = b2Vec2(location.x/PTM_RATIO, location.y/PTM_RATIO);
+    
+    _mouseJoint->SetTarget(locationWorld);
+}
 
-    // top
-    groundBox.Set(b2Vec2(0,s.height/PTM_RATIO), b2Vec2(s.width/PTM_RATIO,s.height/PTM_RATIO));
-    groundBody->CreateFixture(&groundBox,0);
+void HelloWorld::ccTouchesCancelled(cocos2d::CCSet *touches, cocos2d::CCEvent *event) {
+    
+    if (_mouseJoint) {
+        _world->DestroyJoint(_mouseJoint);
+        _mouseJoint = NULL;
+    }
+    
+}
 
-    // left
-    groundBox.Set(b2Vec2(0,s.height/PTM_RATIO), b2Vec2(0,0));
-    groundBody->CreateFixture(&groundBox,0);
-
-    // right
-    groundBox.Set(b2Vec2(s.width/PTM_RATIO,s.height/PTM_RATIO), b2Vec2(s.width/PTM_RATIO,0));
-    groundBody->CreateFixture(&groundBox,0);
+void HelloWorld::ccTouchesEnded(cocos2d::CCSet *touches, cocos2d::CCEvent *event) {
+    if (_mouseJoint) {
+        _world->DestroyJoint(_mouseJoint);
+        _mouseJoint = NULL;
+    }
 }
 
 void HelloWorld::draw()
@@ -169,96 +253,29 @@ void HelloWorld::draw()
 
     kmGLPushMatrix();
 
-    world->DrawDebugData();
+    _world->DrawDebugData();
 
     kmGLPopMatrix();
-}
-
-void HelloWorld::addNewSpriteAtPosition(CCPoint p)
-{
-    CCLOG("Add sprite %0.2f x %02.f",p.x,p.y);
-    CCNode* parent = getChildByTag(kTagParentNode);
-    
-    //We have a 64x64 sprite sheet with 4 different 32x32 images.  The following code is
-    //just randomly picking one of the images
-    int idx = (CCRANDOM_0_1() > .5 ? 0:1);
-    int idy = (CCRANDOM_0_1() > .5 ? 0:1);
-    PhysicsSprite *sprite = new PhysicsSprite();
-    sprite->initWithTexture(m_pSpriteTexture, CCRectMake(32 * idx,32 * idy,32,32));
-    sprite->autorelease();
-    
-    parent->addChild(sprite);
-    
-    sprite->setPosition( CCPointMake( p.x, p.y) );
-    
-    // Define the dynamic body.
-    //Set up a 1m squared box in the physics world
-    b2BodyDef bodyDef;
-    bodyDef.type = b2_dynamicBody;
-    bodyDef.position.Set(p.x/PTM_RATIO, p.y/PTM_RATIO);
-    
-    b2Body *body = world->CreateBody(&bodyDef);
-    
-    // Define another box shape for our dynamic body.
-    b2PolygonShape dynamicBox;
-    dynamicBox.SetAsBox(.5f, .5f);//These are mid points for our 1m box
-    
-    // Define the dynamic body fixture.
-    b2FixtureDef fixtureDef;
-    fixtureDef.shape = &dynamicBox;    
-    fixtureDef.density = 1.0f;
-    fixtureDef.friction = 0.3f;
-    body->CreateFixture(&fixtureDef);
-    
-    sprite->setPhysicsBody(body);
 }
 
 
 void HelloWorld::update(float dt)
 {
-    //It is recommended that a fixed time step is used with Box2D for stability
-    //of the simulation, however, we are using a variable time step here.
-    //You need to make an informed choice, the following URL is useful
-    //http://gafferongames.com/game-physics/fix-your-timestep/
-    
-    int velocityIterations = 8;
-    int positionIterations = 1;
-    
-    // Instruct the world to perform a single step of simulation. It is
-    // generally best to keep the time step and iterations fixed.
-    world->Step(dt, velocityIterations, positionIterations);
-    
-    //Iterate over the bodies in the physics world
-    for (b2Body* b = world->GetBodyList(); b; b = b->GetNext())
-    {
+    _world->Step(dt, 10, 10);
+    for(b2Body *b = _world->GetBodyList(); b; b=b->GetNext()) {
         if (b->GetUserData() != NULL) {
-            //Synchronize the AtlasSprites position and rotation with the corresponding body
-            CCSprite* myActor = (CCSprite*)b->GetUserData();
-            myActor->setPosition( CCPointMake( b->GetPosition().x * PTM_RATIO, b->GetPosition().y * PTM_RATIO) );
-            myActor->setRotation( -1 * CC_RADIANS_TO_DEGREES(b->GetAngle()) );
-        }    
+            CCSprite *sprite = (CCSprite *)b->GetUserData();
+            sprite->setPosition(ccp(b->GetPosition().x * PTM_RATIO,b->GetPosition().y * PTM_RATIO));
+            sprite->setRotation(-1 * CC_RADIANS_TO_DEGREES(b->GetAngle()));
+        }
     }
 }
 
-void HelloWorld::ccTouchesEnded(CCSet* touches, CCEvent* event)
+void HelloWorld::accelerometer(cocos2d::CCAcceleration *accelerometer,  cocos2d::CCAcceleration *acceleration)
 {
-    //Add a new body/atlas sprite at the touched location
-    CCSetIterator it;
-    CCTouch* touch;
-    
-    for( it = touches->begin(); it != touches->end(); it++) 
-    {
-        touch = (CCTouch*)(*it);
-        
-        if(!touch)
-            break;
-        
-        CCPoint location = touch->getLocationInView();
-        
-        location = CCDirector::sharedDirector()->convertToGL(location);
-        
-        addNewSpriteAtPosition( location );
-    }
+    // Landscape left values
+    b2Vec2 gravity(acceleration->y * 30, -acceleration->x * 30);
+    _world->SetGravity(gravity);
 }
 
 CCScene* HelloWorld::scene()
