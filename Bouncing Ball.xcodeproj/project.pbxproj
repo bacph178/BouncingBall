@@ -287,6 +287,10 @@
 		842B4CF41769A1B30051234A /* ball.png in Resources */ = {isa = PBXBuildFile; fileRef = 842B4CF21769A1B30051234A /* ball.png */; };
 		842B4CF71769A5EA0051234A /* paddle-hd.png in Resources */ = {isa = PBXBuildFile; fileRef = 842B4CF51769A5EA0051234A /* paddle-hd.png */; };
 		842B4CF81769A5EA0051234A /* paddle.png in Resources */ = {isa = PBXBuildFile; fileRef = 842B4CF61769A5EA0051234A /* paddle.png */; };
+		847FD5CA176AD49C002BC18B /* court.png in Resources */ = {isa = PBXBuildFile; fileRef = 847FD5C6176AD49C002BC18B /* court.png */; };
+		847FD5CB176AD49C002BC18B /* logo.png in Resources */ = {isa = PBXBuildFile; fileRef = 847FD5C7176AD49C002BC18B /* logo.png */; };
+		847FD5CC176AD49C002BC18B /* mallet.png in Resources */ = {isa = PBXBuildFile; fileRef = 847FD5C8176AD49C002BC18B /* mallet.png */; };
+		847FD5CD176AD49C002BC18B /* puck.png in Resources */ = {isa = PBXBuildFile; fileRef = 847FD5C9176AD49C002BC18B /* puck.png */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -890,6 +894,10 @@
 		842B4CF21769A1B30051234A /* ball.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = ball.png; path = Resources/ball.png; sourceTree = "<group>"; };
 		842B4CF51769A5EA0051234A /* paddle-hd.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = "paddle-hd.png"; path = "Resources/paddle-hd.png"; sourceTree = "<group>"; };
 		842B4CF61769A5EA0051234A /* paddle.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = paddle.png; path = Resources/paddle.png; sourceTree = "<group>"; };
+		847FD5C6176AD49C002BC18B /* court.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = court.png; path = Resources/court.png; sourceTree = "<group>"; };
+		847FD5C7176AD49C002BC18B /* logo.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = logo.png; path = Resources/logo.png; sourceTree = "<group>"; };
+		847FD5C8176AD49C002BC18B /* mallet.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = mallet.png; path = Resources/mallet.png; sourceTree = "<group>"; };
+		847FD5C9176AD49C002BC18B /* puck.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = puck.png; path = Resources/puck.png; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -960,6 +968,10 @@
 		842B495017699F520051234A /* Resources */ = {
 			isa = PBXGroup;
 			children = (
+				847FD5C6176AD49C002BC18B /* court.png */,
+				847FD5C7176AD49C002BC18B /* logo.png */,
+				847FD5C8176AD49C002BC18B /* mallet.png */,
+				847FD5C9176AD49C002BC18B /* puck.png */,
 				842B4CF51769A5EA0051234A /* paddle-hd.png */,
 				842B4CF61769A5EA0051234A /* paddle.png */,
 				842B4CF11769A1B30051234A /* ball-hd.png */,
@@ -2163,6 +2175,10 @@
 				842B4CF41769A1B30051234A /* ball.png in Resources */,
 				842B4CF71769A5EA0051234A /* paddle-hd.png in Resources */,
 				842B4CF81769A5EA0051234A /* paddle.png in Resources */,
+				847FD5CA176AD49C002BC18B /* court.png in Resources */,
+				847FD5CB176AD49C002BC18B /* logo.png in Resources */,
+				847FD5CC176AD49C002BC18B /* mallet.png in Resources */,
+				847FD5CD176AD49C002BC18B /* puck.png in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -2459,7 +2475,7 @@
 					"\"$(PROJECT_NAME)/libs/cocos2dx/platform/third_party/ios\"",
 					"\"$(PROJECT_NAME)/libs/cocos2dx/platform/ios\"",
 				);
-				IPHONEOS_DEPLOYMENT_TARGET = 6.1;
+				IPHONEOS_DEPLOYMENT_TARGET = 6.0;
 				SDKROOT = iphoneos;
 				TARGETED_DEVICE_FAMILY = 1;
 			};
@@ -2490,7 +2506,7 @@
 					"\"$(PROJECT_NAME)/libs/cocos2dx/platform/third_party/ios\"",
 					"\"$(PROJECT_NAME)/libs/cocos2dx/platform/ios\"",
 				);
-				IPHONEOS_DEPLOYMENT_TARGET = 6.1;
+				IPHONEOS_DEPLOYMENT_TARGET = 6.0;
 				OTHER_CFLAGS = "-DNS_BLOCK_ASSERTIONS=1";
 				SDKROOT = iphoneos;
 				TARGETED_DEVICE_FAMILY = 1;
@@ -2501,6 +2517,8 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = YES;
+				CODE_SIGN_IDENTITY = "iPhone Developer: Phùng Hoàng Bắc (R3846E54S7)";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer: Phùng Hoàng Bắc (R3846E54S7)";
 				COPY_PHASE_STRIP = NO;
 				GCC_DYNAMIC_NO_PIC = NO;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
@@ -2517,6 +2535,8 @@
 					"-lsqlite3",
 				);
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE = "09011CF0-7296-4B31-AD7D-BACB5909F286";
+				"PROVISIONING_PROFILE[sdk=iphoneos*]" = "09011CF0-7296-4B31-AD7D-BACB5909F286";
 				USER_HEADER_SEARCH_PATHS = "\"Bouncing Ball/libs\"";
 				WRAPPER_EXTENSION = app;
 			};
@@ -2526,6 +2546,8 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = YES;
+				CODE_SIGN_IDENTITY = "iPhone Developer: Phùng Hoàng Bắc (R3846E54S7)";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer: Phùng Hoàng Bắc (R3846E54S7)";
 				COPY_PHASE_STRIP = YES;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "Bouncing Ball/Prefix.pch";
@@ -2541,6 +2563,8 @@
 					"-lsqlite3",
 				);
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE = "09011CF0-7296-4B31-AD7D-BACB5909F286";
+				"PROVISIONING_PROFILE[sdk=iphoneos*]" = "09011CF0-7296-4B31-AD7D-BACB5909F286";
 				USER_HEADER_SEARCH_PATHS = "\"Bouncing Ball/libs\"";
 				VALIDATE_PRODUCT = YES;
 				WRAPPER_EXTENSION = app;
@@ -2566,6 +2590,7 @@
 				842B4CF017699F5D0051234A /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 	};
