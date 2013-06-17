@@ -76,10 +76,10 @@ HelloWorld::HelloWorld()
     // init physics
     this->initPhysics();
 
-    CCSpriteBatchNode *parent = CCSpriteBatchNode::create("blocks.png", 100);
-    m_pSpriteTexture = parent->getTexture();
-
-    addChild(parent, 0, kTagParentNode);
+//    CCSpriteBatchNode *parent = CCSpriteBatchNode::create("blocks.png", 100);
+//    m_pSpriteTexture = parent->getTexture();
+//
+//    addChild(parent, 0, kTagParentNode);
 
 
   //  addNewSpriteAtPosition(ccp(s.width/2, s.height/2));
@@ -108,6 +108,11 @@ void HelloWorld::initPhysics()
     // Create a world
     b2Vec2 gravity = b2Vec2(0.0f, 0.0f);
     _world = new b2World(gravity);
+    CCSprite *ground = CCSprite::create("court.png");
+    ground->setPosition(ccp(s.width/2 ,s.height/2));
+  //  CCLOG("%f, %f", ground->getPositionX(), ground->getPositionY());
+    ground->setTag(1);
+    this->addChild(ground,-1);
     
     // Create edges around the entire screen
     b2BodyDef groundBodyDef;
@@ -133,8 +138,8 @@ void HelloWorld::initPhysics()
     _groundBody->CreateFixture(&groundBoxDef);
     
     // Create sprite and add it to the layer
-    CCSprite *ball = CCSprite::create("ball.png");
-    ball->setPosition(ccp(100, 100));
+    CCSprite *ball = CCSprite::create("puck.png");
+    ball->setPosition(ccp(s.width/2, s.height/2));
     ball->setTag(1);
     this->addChild(ball);
     
@@ -161,29 +166,54 @@ void HelloWorld::initPhysics()
     ballBody->ApplyLinearImpulse(force, ballBodyDef.position);
     
     // Create paddle and add it to the layer
-    CCSprite *paddle = CCSprite::create("paddle.png");
-    paddle->setPosition(ccp(s.width/2, 50));
-    this->addChild(paddle);
-    
+    CCSprite *paddle1 = CCSprite::create("mallet.png");
+    paddle1->setPosition(ccp(s.width, s.height/2));
+    this->addChild(paddle1);
+
     // Create paddle body
     b2BodyDef paddleBodyDef;
     paddleBodyDef.type = b2_dynamicBody;
-    paddleBodyDef.position.Set(s.width/2/PTM_RATIO, 50/PTM_RATIO);
-    paddleBodyDef.userData = paddle;
-    _paddleBody = _world->CreateBody(&paddleBodyDef);
+    paddleBodyDef.position.Set(s.width/PTM_RATIO, s.height/2/PTM_RATIO);
+    paddleBodyDef.userData = paddle1;
+    _paddleBody1 = _world->CreateBody(&paddleBodyDef);
     
     // Create paddle shape
-    b2PolygonShape paddleShape;
-    paddleShape.SetAsBox(paddle->getContentSize().width/PTM_RATIO/2,
-                         paddle->getContentSize().height/PTM_RATIO/2);
+    b2PolygonShape paddleShape1;
+    paddleShape1.SetAsBox(paddle1->getContentSize().width/PTM_RATIO/2,
+                         paddle1->getContentSize().height/PTM_RATIO/2);
     
     // Create shape definition and add to body
-    b2FixtureDef paddleShapeDef;
-    paddleShapeDef.shape = &paddleShape;
-    paddleShapeDef.density = 10.0f;
-    paddleShapeDef.friction = 0.4f;
-    paddleShapeDef.restitution = 0.1f;
-    _paddleFixture = _paddleBody->CreateFixture(&paddleShapeDef);
+    b2FixtureDef paddleShapeDef1;
+    paddleShapeDef1.shape = &paddleShape1;
+    paddleShapeDef1.density = 10.0f;
+    paddleShapeDef1.friction = 0.4f;
+    paddleShapeDef1.restitution = 0.1f;
+    _paddleFixture1 = _paddleBody1->CreateFixture(&paddleShapeDef1);
+    
+    // Create paddle and add it to the layer
+    CCSprite *paddle2 = CCSprite::create("mallet.png");
+    paddle1->setPosition(ccp(0, s.height/2));
+    this->addChild(paddle2);
+    
+    // Create paddle body
+    b2BodyDef paddleBodyDef2;
+    paddleBodyDef2.type = b2_dynamicBody;
+    paddleBodyDef2.position.Set(0/PTM_RATIO, s.height/2/PTM_RATIO);
+    paddleBodyDef2.userData = paddle2;
+    _paddleBody2 = _world->CreateBody(&paddleBodyDef2);
+    
+    // Create paddle shape
+    b2PolygonShape paddleShape2;
+    paddleShape2.SetAsBox(paddle2->getContentSize().width/PTM_RATIO/2,
+                          paddle2->getContentSize().height/PTM_RATIO/2);
+    
+    // Create shape definition and add to body
+    b2FixtureDef paddleShapeDef2;
+    paddleShapeDef2.shape = &paddleShape2;
+    paddleShapeDef2.density = 10.0f;
+    paddleShapeDef2.friction = 0.4f;
+    paddleShapeDef2.restitution = 0.1f;
+    _paddleFixture2 = _paddleBody2->CreateFixture(&paddleShapeDef2);
     
     this->setTouchEnabled(true);
     
@@ -192,24 +222,57 @@ void HelloWorld::initPhysics()
 
 void HelloWorld::ccTouchesBegan(cocos2d::CCSet* touches, cocos2d::CCEvent *event)
 {
-    if (_mouseJoint != NULL) return;
+//    if (_mouseJoint != NULL) return;
+//    
+//    CCTouch *myTouch = (CCTouch*)touches->anyObject();
+//    CCPoint location = myTouch->getLocationInView();
+//    location = CCDirector::sharedDirector()->convertToGL(location);
+//    b2Vec2 locationWorld = b2Vec2(location.x/PTM_RATIO, location.y/PTM_RATIO);
+//    
+//    if (_paddleFixture1->TestPoint(locationWorld)) {
+//        b2MouseJointDef md;
+//        md.bodyA = _groundBody;
+//        md.bodyB = _paddleBody;
+//        md.target = locationWorld;
+//        md.collideConnected = true;
+//        md.maxForce = 1000.0f * _paddleBody->GetMass();
+//        
+//        _mouseJoint = (b2MouseJoint *)_world->CreateJoint(&md);
+//        _paddleBody->SetAwake(true);
+//    }
+    CCSetIterator i;
     
-    CCTouch *myTouch = (CCTouch*)touches->anyObject();
-    CCPoint location = myTouch->getLocationInView();
-    location = CCDirector::sharedDirector()->convertToGL(location);
-    b2Vec2 locationWorld = b2Vec2(location.x/PTM_RATIO, location.y/PTM_RATIO);
-    
-    if (_paddleFixture->TestPoint(locationWorld)) {
-        b2MouseJointDef md;
-        md.bodyA = _groundBody;
-        md.bodyB = _paddleBody;
-        md.target = locationWorld;
-        md.collideConnected = true;
-        md.maxForce = 1000.0f * _paddleBody->GetMass();
+    for (i = touches->begin(); i != touches->end(); i++) {
+        if (_mouseJoint != NULL) return;
+        CCTouch *touch = (CCTouch*)(*i);
+        CCPoint tap = touch->getLocation();
         
-        _mouseJoint = (b2MouseJoint *)_world->CreateJoint(&md);
-        _paddleBody->SetAwake(true);
+        b2Vec2 locationWorld = b2Vec2(tap.x / PTM_RATIO, tap.y / PTM_RATIO);
+        
+        if (_paddleFixture1->TestPoint(locationWorld)) {
+            b2MouseJointDef md;
+            md.bodyA = _groundBody;
+            md.bodyB = _paddleBody1;
+            md.target = locationWorld;
+            md.collideConnected = true;
+            md.maxForce = 1000.0f * _paddleBody1->GetMass();
+            
+            _mouseJoint = (b2MouseJoint *)_world->CreateJoint(&md);
+            _paddleBody1->SetAwake(true);
+        }
+        if (_paddleFixture2->TestPoint(locationWorld)) {
+            b2MouseJointDef md;
+            md.bodyA = _groundBody;
+            md.bodyB = _paddleBody2;
+            md.target = locationWorld;
+            md.collideConnected = true;
+            md.maxForce = 1000.0f * _paddleBody2->GetMass();
+            
+            _mouseJoint = (b2MouseJoint *)_world->CreateJoint(&md);
+            _paddleBody2->SetAwake(true);
+        }
     }
+
 }
 
 void HelloWorld::ccTouchesMoved(cocos2d::CCSet *touches, cocos2d::CCEvent *event)
@@ -265,8 +328,21 @@ void HelloWorld::update(float dt)
     for(b2Body *b = _world->GetBodyList(); b; b=b->GetNext()) {
         if (b->GetUserData() != NULL) {
             CCSprite *sprite = (CCSprite *)b->GetUserData();
+            if (sprite->getTag() == 1) {
+                static int maxSpeed = 10;
+                
+                b2Vec2 velocity = b->GetLinearVelocity();
+                float32 speed = velocity.Length();
+                
+                if (speed > maxSpeed) {
+                    b->SetLinearDamping(0.5);
+                } else if (speed < maxSpeed) {
+                    b->SetLinearDamping(0.0);
+                }
+                
+            }
             sprite->setPosition(ccp(b->GetPosition().x * PTM_RATIO,b->GetPosition().y * PTM_RATIO));
-            sprite->setRotation(-1 * CC_RADIANS_TO_DEGREES(b->GetAngle()));
+           // sprite->setRotation(-1 * CC_RADIANS_TO_DEGREES(b->GetAngle()));
         }
     }
 }

@@ -46,9 +46,13 @@ private:
     b2Body *_groundBody;
     b2Fixture *_bottomFixture;
     b2Fixture *_ballFixture;
-    b2Body *_paddleBody;
-    b2Fixture *_paddleFixture;
+    b2Body *_paddleBody1;
+    b2Body *_paddleBody2;
+
+    b2Fixture *_paddleFixture1;
+    b2Fixture *_paddleFixture2;
     b2MouseJoint *_mouseJoint;
+    cocos2d::CCArray *touchJointList;
 };
 
 #endif // __HELLO_WORLD_H__
